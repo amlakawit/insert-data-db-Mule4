@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="insert-single-record" doc:id="5dfcf290-b0be-4599-9231-31478e3a7455" >
+		<http:listener doc:name="POST/single-insert" doc:id="23ab08a8-67c7-460e-b343-b657fe796cfe" config-ref="HTTP_Listener_config" path="/single-insert" allowedMethods="POST"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="0b5b4ece-05e0-4b73-a88f-c91ad552d6bd" >
+			<route >
+				<db:insert doc:name="MySql" doc:id="d6af01ec-f1c6-49cd-8a46-b0d5955f0c3c" config-ref="MySql_Config">
+					<db:sql ><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+				</db:insert>
+			</route>
+			<route >
+				<db:insert doc:name="Postgres" doc:id="5eaf1723-31a3-4ecb-aad1-566296156d7e" config-ref="PostgreSql_Config">
+					<db:sql ><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+				</db:insert>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Message" doc:id="72362818-0f2f-4ed9-a2c3-4c7b5b2fe26c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Record inserted successfully"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</flow>
+	<flow name="insert-multiple-records-using-for-each-scope" doc:id="90497b0e-adf3-4f25-ab6d-f072e5e04af6" >
+		<http:listener doc:name="POST/multiple-insert-w-foreach" doc:id="da789222-6b00-4fb4-a5b9-c8e45ae3fce9" config-ref="HTTP_Listener_config" path="/multiple-insert-w-foreach" allowedMethods="POST"/>
+		<foreach doc:name="For Each" doc:id="735d5706-b6b7-4fdd-b2c3-dd6086d63afd" >
+			<scatter-gather doc:name="Scatter-Gather" doc:id="a4e4184f-e358-45d0-97c0-96456f7aa68b" >
+				<route >
+					<db:insert doc:name="MySql" doc:id="b6b452d0-b073-45f1-bfc8-94d18b5abf5a" config-ref="MySql_Config">
+				<db:sql><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+			</db:insert>
+				</route>
+				<route >
+					<db:insert doc:name="Postgres" doc:id="bb38fdfc-530f-49ec-95c5-a69a9b8a41c2" config-ref="PostgreSql_Config">
+				<db:sql><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+			</db:insert>
+				</route>
+			</scatter-gather>
+		</foreach>
+		<ee:transform doc:name="Message" doc:id="705e4032-b0b6-4bcf-a1f6-aa78678cd1a4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Records inserted successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="insert-multiple-records-using-pforeach" doc:id="7d1402ce-b177-4e5e-aa7b-e03c81dc718d" >
+		<http:listener doc:name="POST/multiple-insert-w-pforeach" doc:id="14ca0359-1a94-42ec-9055-9640a673f32e" config-ref="HTTP_Listener_config" path="/multiple-insert-w-pforeach" allowedMethods="POST" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="4b5323e7-7211-4314-ad7d-65f7a490282c" >
+			<scatter-gather doc:name="Scatter-Gather" doc:id="52b6b851-8f16-4c1e-a386-3cf85c78ad13" >
+				<route >
+					<db:insert doc:name="MySql" doc:id="610fbf22-77d7-44cc-bc15-0d6c61a88bd8" config-ref="MySql_Config">
+				<db:sql><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+			</db:insert>
+				</route>
+				<route >
+					<db:insert doc:name="Postgres" doc:id="de85acd3-b61a-4f27-88b3-8e3458e5b558" config-ref="PostgreSql_Config">
+				<db:sql><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+				<db:input-parameters><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+			</db:insert>
+				</route>
+			</scatter-gather>
+		</parallel-foreach>
+		<ee:transform doc:name="Message" doc:id="68f652aa-20dc-436c-818e-f77067b71255" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Records inserted successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="insert-cont-incoming-daa-using-pforeach" doc:id="26a32e21-9228-42b1-803f-96c1c7fb4440" >
+		<file:listener doc:name="On New or Updated File" doc:id="9b367f7d-3c96-4ddf-bea2-43337b8f3dbf" config-ref="File_Config" autoDelete="true" overwrite="true">
+			<scheduling-strategy >
+				<fixed-frequency frequency="5" timeUnit="SECONDS"/>
+			</scheduling-strategy>
+			<file:matcher filenamePattern="*.json" />
+		</file:listener>
+		<foreach doc:name="For Each" doc:id="8ff854dd-4771-4f3f-83fb-234806dd1cdb" >
+			<scatter-gather doc:name="Scatter-Gather" doc:id="07489ca5-9a20-42be-a77d-79f7121798b5" >
+				<route >
+					<db:insert doc:name="MySql" doc:id="5dd8907a-6dc2-4ba7-af9f-44c09283dffd" config-ref="MySql_Config" >
+						<db:sql ><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+						<db:input-parameters ><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+					</db:insert>
+				</route>
+				<route >
+					<db:insert doc:name="Postgres" doc:id="406889d4-f5e8-4852-96bd-df6e5b31d6ee" config-ref="PostgreSql_Config" >
+						<db:sql ><![CDATA[INSERT INTO customers (CustomerID, CustomerName, ContactName, Address, City, PostalCode, Country)
+VALUES (:CustomerID, :CustomerName, :ContactName, :Address, :City, :PostalCode, :Country);
+]]></db:sql>
+						<db:input-parameters ><![CDATA[#[{
+'CustomerID': payload.CustomerID,
+'CustomerName': payload.CustomerName, 
+'ContactName': payload.ContactName, 
+'Address':payload.Address,
+ 'City': payload.City, 
+ 'PostalCode': payload.PostalCode, 
+ 'Country': payload.Country
+}]]]></db:input-parameters>
+					</db:insert>
+				</route>
+			</scatter-gather>
+		</foreach>
+		<ee:transform doc:name="Message" doc:id="baaf6ee6-fecd-4653-9bff-ade5f1d8e8e9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "Records inserted successfully"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

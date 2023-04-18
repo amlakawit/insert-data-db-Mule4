@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f02a6b08-50a4-4ab9-a6ef-791ff1043b5e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="02806dde-24a6-4e81-9645-1c70bd5e887d" file="config.yaml" />
+	<db:config name="MySql_Config" doc:name="Database Config" doc:id="1fc5dcec-6e2a-482c-acde-2f971c80896c" >
+		<db:my-sql-connection host="${mysql.host}" port="${mysql.port}" user="${mysql.user}" password="${mysql.password}" database="${mysql.database}" />
+	</db:config>
+	<db:config name="PostgreSql_Config" doc:name="Database Config" doc:id="a9df103d-49a7-47aa-b676-e19d8ad3f161" >
+		<db:generic-connection url="${postgres.url}" driverClassName="${postgres.dclass}" user="${postgres.username}" password="${postgres.password}" />
+	</db:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="ca7513bf-8076-475c-81bf-d970a826f82a" >
+		<file:connection workingDir="C:\workspace\MuleSoft\MuleSoftWithFish\Hands-On\insert-to-db" />
+	</file:config>
+</mule>
